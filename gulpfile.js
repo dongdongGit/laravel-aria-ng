@@ -15,67 +15,68 @@ gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 gulp.task('lint', function () {
     return gulp.src([
         // 'src/scripts/**/*.js'
-        'resource/aria-ng/src/scripts/**/*.js'
+        'resources/aria-ng/src/scripts/**/*.js'
     ]).pipe(reload({stream: true, once: true}))
         .pipe($.eslint.format())
         .pipe($.if(!browserSync.active, $.eslint.failAfterError()))
-        .pipe(gulp.dest('public/aria-ng/src/scripts'));
+        .pipe(gulp.dest('resources/aria-ng/src/scripts'));
 });
 
 gulp.task('prepare-fonts', function () {
     return gulp.src([
         'node_modules/font-awesome/fonts/fontawesome-webfont.*'
-    ]).pipe(gulp.dest('.tmp/fonts'));
+    ]).pipe(gulp.dest('resources/aria-ng/.tmp/fonts'));
 });
 
 gulp.task('process-fonts', ['prepare-fonts'], function () {
     return gulp.src([
-        '.tmp/fonts/**/*'
-    ]).pipe(gulp.dest('dist/fonts'));
+        'resources/aria-ng/.tmp/fonts/**/*'
+    ]).pipe(gulp.dest('public/aria-ng/fonts'));
 });
 
 gulp.task('prepare-langs', function () {
     return gulp.src([
-        'src/langs/**/*'
-    ]).pipe(gulp.dest('.tmp/langs'));
+        'resources/aria-ng/src/langs/**/*'
+    ]).pipe(gulp.dest('resources/aria-ng/.tmp/langs'));
 });
 
 gulp.task('process-langs', ['prepare-langs'], function () {
     return gulp.src([
-        '.tmp/langs/**/*'
-    ]).pipe(gulp.dest('dist/langs'));
+        'resources/aria-ng/.tmp/langs/**/*'
+    ]).pipe(gulp.dest('public/aria-ng/langs'));
 });
 
 gulp.task('prepare-styles', function () {
     return gulp.src([
-        'src/styles/**/*.css'
+        'resources/aria-ng/src/styles/**/*.css'
     ]).pipe($.autoprefixer({browsers: ['> 1%', 'last 2 versions', 'Firefox ESR']}))
-        .pipe(gulp.dest('.tmp/styles'))
+        .pipe(gulp.dest('resources/aria-ng/.tmp/styles'))
         .pipe(reload({stream: true}));
 });
 
 gulp.task('prepare-scripts', function () {
     return gulp.src([
-        'resource/aria-ng/src/scripts/**/*.js'
+        'resources/aria-ng/src/scripts/**/*.js'
     ]).pipe($.plumber())
         .pipe($.injectVersion({replace: '${ARIANG_VERSION}'}))
         .pipe($.replace(/\${ARIANG_BUILD_COMMIT}/g, tryFn(git.short) || 'Local'))
-        .pipe(gulp.dest('.tmp/scripts'))
+        .pipe(gulp.dest('resources/aria-ng/.tmp/scripts'))
         .pipe(reload({stream: true}));
 });
 
 gulp.task('prepare-views', function () {
     return gulp.src([
-        'src/views/**/*.html'
+        'resources/aria-ng/src/views/**/*.html'
     ]).pipe($.htmlmin({collapseWhitespace: true}))
-        .pipe($.angularTemplatecache({module: 'ariaNg', filename: 'views/templates.js', root: 'views/'}))
-        .pipe(gulp.dest('.tmp/scripts'));
+        .pipe($.angularTemplatecache({module: 'ariaNg', filename: 'resources/aria-ng/src/views/templates.js', root: 'resources/aria-ng/src/views/'}))
+        .pipe(gulp.dest('resources/aria-ng/.tmp/scripts'));
 });
 
+// TODO: src
 gulp.task('prepare-html', ['prepare-styles', 'prepare-scripts', 'prepare-views'], function () {
     return gulp.src([
-        'src/*.html'
-    ]).pipe($.useref({searchPath: ['.tmp', 'src', '.']}))
+        'resources/aria-ng/src/*.html'
+    ]).pipe($.useref({searchPath: ['resources/aria-ng/.tmp', 'resources/aria-ng/src', 'resources/aria-ng/']}))
         .pipe($.if('js/*.js', $.replace(/\/\/# sourceMappingURL=.*/g, '')))
         .pipe($.if('css/*.css', $.replace(/\/\*# sourceMappingURL=.* \*\/$/g, '')))
         .pipe($.if(['js/moment-with-locales-*.min.js', 'js/plugins.min.js', 'js/aria-ng.min.js'], $.uglify({output: {comments: saveLicense}})))
@@ -83,45 +84,45 @@ gulp.task('prepare-html', ['prepare-styles', 'prepare-scripts', 'prepare-views']
         .pipe($.if(['js/plugins.min.js', 'js/aria-ng.min.js', 'css/plugins.min.css', 'css/aria-ng.min.css'], $.rev()))
         .pipe($.if('*.html', $.htmlmin({collapseWhitespace: true})))
         .pipe($.revReplace())
-        .pipe(gulp.dest('.tmp'));
+        .pipe(gulp.dest('resources/aria-ng/.tmp'));
 });
 
 gulp.task('process-html', ['prepare-html'], function () {
     return gulp.src([
-        '.tmp/*.html'
+        'resources/aria-ng/.tmp/*.html'
     ]).pipe($.replace(/<!-- AriaNg-Bundle:\w+ -->/, ''))
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest('public/aria-ng/dist'));
 });
 
 gulp.task('process-assets', ['process-html'], function () {
     return gulp.src([
-        '.tmp/css/**/*',
-        '.tmp/js/**/*'
+        'resources/aria-ng/.tmp/css/**/*',
+        'resources/aria-ng/.tmp/js/**/*'
     ],{ base: '.tmp' })
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest('public/aria-ng/dist'));
 });
 
 gulp.task('process-assets-bundle', ['prepare-fonts', 'prepare-langs', 'prepare-html'], function () {
-    return gulp.src('.tmp/index.html')
+    return gulp.src('resources/aria-ng/.tmp/index.html')
         .pipe($.replace(/<link rel="stylesheet" href="(css\/[a-zA-Z0-9\-_.]+\.css)">/g, function(match, fileName) {
             var content = fs.readFileSync('.tmp/' + fileName, 'utf8');
             return '<style type="text/css">' + content + '</style>';
         }))
         .pipe($.replace(/<script src="(js\/[a-zA-Z0-9\-_.]+\.js)"><\/script>/g, function(match, fileName) {
-            var content = fs.readFileSync('.tmp/' + fileName, 'utf8');
+            var content = fs.readFileSync('resources/aria-ng/.tmp/' + fileName, 'utf8');
             return '<script type="application/javascript">' + content + '</script>';
         }))
         .pipe($.replace(/url\(\.\.\/(fonts\/[a-zA-Z0-9\-]+\.woff)(\?[a-zA-Z0-9\-_=.]+)?\)/g, function(match, fileName) {
-            if (!fs.existsSync('.tmp/' + fileName)) {
+            if (!fs.existsSync('resources/aria-ng/.tmp/' + fileName)) {
                 return match;
             }
 
-            var contentBuffer = fs.readFileSync('.tmp/' + fileName);
+            var contentBuffer = fs.readFileSync('resources/aria-ng/.tmp/' + fileName);
             var contentBase64 = contentBuffer.toString('base64');
             return 'url(data:application/x-font-woff;base64,' + contentBase64 + ')';
         }))
         .pipe($.replace('<!-- AriaNg-Bundle:languages -->', function() {
-            var langDir = '.tmp/langs/';
+            var langDir = 'resources/aria-ng/.tmp/langs/';
             var result = '';
             var fileNames = fs.readdirSync(langDir, 'utf8');
 
@@ -154,12 +155,12 @@ gulp.task('process-assets-bundle', ['prepare-fonts', 'prepare-langs', 'prepare-h
 
 gulp.task('process-manifest', function () {
     return gulp.src([
-        'dist/css/**',
-        'dist/js/**',
-        'dist/fonts/fontawesome-webfont.woff2',
-        'dist/*.html',
-        'dist/*.ico',
-        'dist/*.png'
+        'public/aria-ng/dist/css/**',
+        'public/aria-ng/dist/js/**',
+        'public/aria-ng/dist/fonts/fontawesome-webfont.woff2',
+        'public/aria-ng/dist/*.html',
+        'public/aria-ng/dist/*.ico',
+        'public/aria-ng/dist/*.png'
     ], {base: 'dist/'})
         .pipe($.manifest({
             hash: true,
@@ -168,41 +169,43 @@ gulp.task('process-manifest', function () {
             filename: 'index.manifest',
             exclude: 'index.manifest'
         }))
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest('public/aria-ng/dist'));
 });
 
-gulp.task('process-full-extras', function () {
-    return gulp.src([
-        'LICENSE',
-        'src/*.*',
-        '!src/*.html'
-    ], {
-        dot: true
-    }).pipe(gulp.dest('dist'));
-});
+// gulp.task('process-full-extras', function () {
+//     return gulp.src([
+//         'LICENSE',
+//         'src/*.*',
+//         '!src/*.html'
+//     ], {
+//         dot: true
+//     }).pipe(gulp.dest('public/aria-ng/dist'));
+// });
 
-gulp.task('process-tiny-extras', function () {
-    return gulp.src([
-        'LICENSE'
-    ]).pipe(gulp.dest('dist'));
-});
+// gulp.task('process-tiny-extras', function () {
+//     return gulp.src([
+//         'LICENSE'
+//     ]).pipe(gulp.dest('public/aria-ng/dist'));
+// });
 
 gulp.task('info', function () {
     return gulp.src([
-        'dist/**/*'
+        'public/aria-ng/dist/**/*'
     ]).pipe($.size({title: 'build', gzip: true}));
 });
 
-gulp.task('build', $.sequence('lint', 'process-fonts', 'process-langs', 'process-assets', 'process-manifest', 'process-full-extras', 'info'));
+// gulp.task('build', $.sequence('lint', 'process-fonts', 'process-langs', 'process-assets', 'process-manifest', 'process-full-extras', 'info'));
+gulp.task('build', $.sequence('lint', 'process-fonts', 'process-langs', 'process-assets', 'process-manifest', 'info'));
 
-gulp.task('build-bundle', $.sequence('lint', 'process-assets-bundle', 'process-tiny-extras', 'info'));
+gulp.task('build-bundle', $.sequence('lint', 'process-assets-bundle', 'info'));
+// gulp.task('build-bundle', $.sequence('lint', 'process-assets-bundle', 'process-tiny-extras', 'info'));
 
 gulp.task('serve', ['prepare-styles', 'prepare-scripts', 'prepare-fonts'], function () {
     browserSync({
         notify: false,
         port: 9000,
         server: {
-            baseDir: ['.tmp', 'src'],
+            baseDir: ['resource/aria-ng/.tmp', 'resource/aria-ng/src'],
             routes: {
                 '/node_modules': 'node_modules'
             }
@@ -210,18 +213,18 @@ gulp.task('serve', ['prepare-styles', 'prepare-scripts', 'prepare-fonts'], funct
     });
 
     gulp.watch([
-        'resource/aria-ng/src/*.html',
-        'resource/aria-ng/src/*.ico',
-        'resource/aria-ng/src/*.png',
-        'resource/aria-ng/src/langs/*.txt',
-        'resource/aria-ng/src/views/*.html',
-        'resource/aria-ng/src/imgs/**/*',
-        'resource/aria-ng/.tmp/fonts/**/*'
+        'resources/aria-ng/src/*.html',
+        'resources/aria-ng/src/*.ico',
+        'resources/aria-ng/src/*.png',
+        'resources/aria-ng/src/langs/*.txt',
+        'resources/aria-ng/src/views/*.html',
+        'resources/aria-ng/src/imgs/**/*',
+        'resources/aria-ng/.tmp/fonts/**/*'
     ]).on('change', reload);
 
-    gulp.watch('resource/aria-ng/src/styles/**/*.css', ['prepare-styles']);
-    gulp.watch('resource/aria-ng/src/scripts/**/*.js', ['prepare-scripts']);
-    gulp.watch('resource/aria-ng/src/fonts/**/*', ['prepare-fonts']);
+    gulp.watch('resources/aria-ng/src/styles/**/*.css', ['prepare-styles']);
+    gulp.watch('resources/aria-ng/src/scripts/**/*.js', ['prepare-scripts']);
+    gulp.watch('resources/aria-ng/src/fonts/**/*', ['prepare-fonts']);
 });
 
 gulp.task('serve:dist', function () {

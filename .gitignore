@@ -2,7 +2,7 @@
 /public/hot
 /public/storage
 /public/aria-ng
-/resource/aria-ng/.tmp
+/resources/aria-ng/.tmp
 /storage/*.key
 /vendor
 .env
