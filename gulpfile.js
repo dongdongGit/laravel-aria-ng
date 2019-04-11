@@ -14,11 +14,12 @@ gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
 gulp.task('lint', function () {
     return gulp.src([
-        'src/scripts/**/*.js'
+        // 'src/scripts/**/*.js'
+        'resource/aria-ng/src/scripts/**/*.js'
     ]).pipe(reload({stream: true, once: true}))
         .pipe($.eslint.format())
         .pipe($.if(!browserSync.active, $.eslint.failAfterError()))
-        .pipe(gulp.dest('src/scripts'));
+        .pipe(gulp.dest('public/aria-ng/src/scripts'));
 });
 
 gulp.task('prepare-fonts', function () {
@@ -55,7 +56,7 @@ gulp.task('prepare-styles', function () {
 
 gulp.task('prepare-scripts', function () {
     return gulp.src([
-        'src/scripts/**/*.js'
+        'resource/aria-ng/src/scripts/**/*.js'
     ]).pipe($.plumber())
         .pipe($.injectVersion({replace: '${ARIANG_VERSION}'}))
         .pipe($.replace(/\${ARIANG_BUILD_COMMIT}/g, tryFn(git.short) || 'Local'))
@@ -209,18 +210,18 @@ gulp.task('serve', ['prepare-styles', 'prepare-scripts', 'prepare-fonts'], funct
     });
 
     gulp.watch([
-        'src/*.html',
-        'src/*.ico',
-        'src/*.png',
-        'src/langs/*.txt',
-        'src/views/*.html',
-        'src/imgs/**/*',
-        '.tmp/fonts/**/*'
+        'resource/aria-ng/src/*.html',
+        'resource/aria-ng/src/*.ico',
+        'resource/aria-ng/src/*.png',
+        'resource/aria-ng/src/langs/*.txt',
+        'resource/aria-ng/src/views/*.html',
+        'resource/aria-ng/src/imgs/**/*',
+        'resource/aria-ng/.tmp/fonts/**/*'
     ]).on('change', reload);
 
-    gulp.watch('src/styles/**/*.css', ['prepare-styles']);
-    gulp.watch('src/scripts/**/*.js', ['prepare-scripts']);
-    gulp.watch('src/fonts/**/*', ['prepare-fonts']);
+    gulp.watch('resource/aria-ng/src/styles/**/*.css', ['prepare-styles']);
+    gulp.watch('resource/aria-ng/src/scripts/**/*.js', ['prepare-scripts']);
+    gulp.watch('resource/aria-ng/src/fonts/**/*', ['prepare-fonts']);
 });
 
 gulp.task('serve:dist', function () {

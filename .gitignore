@@ -1,7 +1,7 @@
 /node_modules
 /public/hot
 /public/storage
-/resource/.tmp
+/resource/aria-ng/.tmp
 /storage/*.key
 /vendor
 .env
