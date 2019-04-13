@@ -10,7 +10,7 @@ var saveLicense = require('uglify-save-license');
 var $ = gulpLoadPlugins();
 var reload = browserSync.reload;
 
-gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
+gulp.task('clean', del.bind(null, ['resources/aria-ng/.tmp', 'public/aria-ng']));
 
 gulp.task('lint', function () {
     return gulp.src([
@@ -68,7 +68,7 @@ gulp.task('prepare-views', function () {
     return gulp.src([
         'resources/aria-ng/src/views/**/*.html'
     ]).pipe($.htmlmin({collapseWhitespace: true}))
-        .pipe($.angularTemplatecache({module: 'ariaNg', filename: 'resources/aria-ng/src/views/templates.js', root: 'resources/aria-ng/src/views/'}))
+        .pipe($.angularTemplatecache({module: 'ariaNg', filename: 'views/templates.js', root: 'resources/aria-ng/src/views/'}))
         .pipe(gulp.dest('resources/aria-ng/.tmp/scripts'));
 });
 
@@ -91,21 +91,21 @@ gulp.task('process-html', ['prepare-html'], function () {
     return gulp.src([
         'resources/aria-ng/.tmp/*.html'
     ]).pipe($.replace(/<!-- AriaNg-Bundle:\w+ -->/, ''))
-        .pipe(gulp.dest('public/aria-ng/dist'));
+        .pipe(gulp.dest('public/aria-ng'));
 });
 
 gulp.task('process-assets', ['process-html'], function () {
     return gulp.src([
         'resources/aria-ng/.tmp/css/**/*',
         'resources/aria-ng/.tmp/js/**/*'
-    ],{ base: '.tmp' })
-        .pipe(gulp.dest('public/aria-ng/dist'));
+    ],{ base: 'resources/aria-ng/.tmp' })
+        .pipe(gulp.dest('public/aria-ng'));
 });
 
 gulp.task('process-assets-bundle', ['prepare-fonts', 'prepare-langs', 'prepare-html'], function () {
     return gulp.src('resources/aria-ng/.tmp/index.html')
         .pipe($.replace(/<link rel="stylesheet" href="(css\/[a-zA-Z0-9\-_.]+\.css)">/g, function(match, fileName) {
-            var content = fs.readFileSync('.tmp/' + fileName, 'utf8');
+            var content = fs.readFileSync('resources/aria-ng/.tmp/' + fileName, 'utf8');
             return '<style type="text/css">' + content + '</style>';
         }))
         .pipe($.replace(/<script src="(js\/[a-zA-Z0-9\-_.]+\.js)"><\/script>/g, function(match, fileName) {
@@ -150,18 +150,18 @@ gulp.task('process-assets-bundle', ['prepare-fonts', 'prepare-langs', 'prepare-h
             return result;
         }))
         .pipe($.replace(/<[a-z]+( [a-z\-]+="[a-zA-Z0-9\- ]+")* [a-z\-]+="((favicon.ico)|(favicon.png)|(tileicon.png)|(touchicon.png))"\/?>/g, ''))
-        .pipe(gulp.dest('dist'));
+        .pipe(gulp.dest('public/aria-ng'));
 });
 
 gulp.task('process-manifest', function () {
     return gulp.src([
-        'public/aria-ng/dist/css/**',
-        'public/aria-ng/dist/js/**',
-        'public/aria-ng/dist/fonts/fontawesome-webfont.woff2',
-        'public/aria-ng/dist/*.html',
-        'public/aria-ng/dist/*.ico',
-        'public/aria-ng/dist/*.png'
-    ], {base: 'dist/'})
+        'public/aria-ng/css/**',
+        'public/aria-ng/js/**',
+        'public/aria-ng/fonts/fontawesome-webfont.woff2',
+        'public/aria-ng/*.html',
+        'public/aria-ng/*.ico',
+        'public/aria-ng/*.png'
+    ], {base: 'public/aria-ng/'})
         .pipe($.manifest({
             hash: true,
             preferOnline: true,
@@ -169,33 +169,32 @@ gulp.task('process-manifest', function () {
             filename: 'index.manifest',
             exclude: 'index.manifest'
         }))
-        .pipe(gulp.dest('public/aria-ng/dist'));
+        .pipe(gulp.dest('public/aria-ng'));
 });
 
-// gulp.task('process-full-extras', function () {
-//     return gulp.src([
-//         'LICENSE',
-//         'src/*.*',
-//         '!src/*.html'
-//     ], {
-//         dot: true
-//     }).pipe(gulp.dest('public/aria-ng/dist'));
-// });
+gulp.task('process-full-extras', function () {
+    return gulp.src([
+        // 'LICENSE',
+        'resources/aria-ng/src/*.*',
+        '!resources/aria-ng/src/*.html'
+    ], {
+        dot: true
+    }).pipe(gulp.dest('public/aria-ng'));
+});
 
 // gulp.task('process-tiny-extras', function () {
 //     return gulp.src([
 //         'LICENSE'
-//     ]).pipe(gulp.dest('public/aria-ng/dist'));
+//     ]).pipe(gulp.dest('public/aria-ng'));
 // });
 
 gulp.task('info', function () {
     return gulp.src([
-        'public/aria-ng/dist/**/*'
+        'public/aria-ng/**/*'
     ]).pipe($.size({title: 'build', gzip: true}));
 });
 
-// gulp.task('build', $.sequence('lint', 'process-fonts', 'process-langs', 'process-assets', 'process-manifest', 'process-full-extras', 'info'));
-gulp.task('build', $.sequence('lint', 'process-fonts', 'process-langs', 'process-assets', 'process-manifest', 'info'));
+gulp.task('build', $.sequence('lint', 'process-fonts', 'process-langs', 'process-assets', 'process-manifest', 'process-full-extras', 'info'));
 
 gulp.task('build-bundle', $.sequence('lint', 'process-assets-bundle', 'info'));
 // gulp.task('build-bundle', $.sequence('lint', 'process-assets-bundle', 'process-tiny-extras', 'info'));
