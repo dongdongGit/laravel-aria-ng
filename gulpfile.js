@@ -76,7 +76,7 @@ gulp.task('prepare-views', function () {
 gulp.task('prepare-html', ['prepare-styles', 'prepare-scripts', 'prepare-views'], function () {
     return gulp.src([
         'resources/aria-ng/src/*.html'
-    ]).pipe($.useref({searchPath: ['resources/aria-ng/.tmp', 'resources/aria-ng/src', 'resources/aria-ng/']}))
+    ]).pipe($.useref({searchPath: ['resources/aria-ng/.tmp', 'resources/aria-ng/src', 'resources/aria-ng/', '.']}))
         .pipe($.if('js/*.js', $.replace(/\/\/# sourceMappingURL=.*/g, '')))
         .pipe($.if('css/*.css', $.replace(/\/\*# sourceMappingURL=.* \*\/$/g, '')))
         .pipe($.if(['js/moment-with-locales-*.min.js', 'js/plugins.min.js', 'js/aria-ng.min.js'], $.uglify({output: {comments: saveLicense}})))
