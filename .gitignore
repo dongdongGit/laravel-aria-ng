@@ -3,6 +3,7 @@
 /public/storage
 /public/aria-ng
 /resources/aria-ng/.tmp
+/resources/views/ng.blade.php
 /storage/*.key
 /vendor
 .env
