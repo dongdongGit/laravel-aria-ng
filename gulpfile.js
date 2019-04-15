@@ -10,11 +10,10 @@ var saveLicense = require('uglify-save-license');
 var $ = gulpLoadPlugins();
 var reload = browserSync.reload;
 
-gulp.task('clean', del.bind(null, ['resources/aria-ng/.tmp', 'public/aria-ng']));
+gulp.task('clean', del.bind(null, ['resources/aria-ng/.tmp', 'public/aria-ng', 'resources/views/ng.blade.php']));
 
 gulp.task('lint', function () {
     return gulp.src([
-        // 'src/scripts/**/*.js'
         'resources/aria-ng/src/scripts/**/*.js'
     ]).pipe(reload({stream: true, once: true}))
         .pipe($.eslint.format())
@@ -68,7 +67,7 @@ gulp.task('prepare-views', function () {
     return gulp.src([
         'resources/aria-ng/src/views/**/*.html'
     ]).pipe($.htmlmin({collapseWhitespace: true}))
-        .pipe($.angularTemplatecache({module: 'ariaNg', filename: 'views/templates.js', root: 'resources/aria-ng/src/views/'}))
+        .pipe($.angularTemplatecache({module: 'ariaNg', filename: 'views/templates.js', root: 'views/'}))
         .pipe(gulp.dest('resources/aria-ng/.tmp/scripts'));
 });
 
@@ -91,7 +90,11 @@ gulp.task('process-html', ['prepare-html'], function () {
     return gulp.src([
         'resources/aria-ng/.tmp/*.html'
     ]).pipe($.replace(/<!-- AriaNg-Bundle:\w+ -->/, ''))
-        .pipe(gulp.dest('public/aria-ng'));
+        .pipe($.replace(/\{\{([a-zA-Z |'|(\)]*)\}\}/g, '{\\{$1}}'))
+        .pipe($.rename('ng.blade.php'))
+        .pipe($.replace(/(css|js)\/([A-Za-z0-9\-\.]+)\.(css|js)/g, 'aria-ng/$1/$2.$3'))
+        .pipe(gulp.dest('resources/views/'))
+        // .pipe(gulp.dest('public/aria-ng'));
 });
 
 gulp.task('process-assets', ['process-html'], function () {

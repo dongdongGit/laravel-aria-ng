@@ -15,6 +15,7 @@ Connected=已連線
 Disconnected=未連線
 Global=全域
 New=新增
+User=用戶
 Start=開始工作
 Pause=暫停工作
 Retry=重試

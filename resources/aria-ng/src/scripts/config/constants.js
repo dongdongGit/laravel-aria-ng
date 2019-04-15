@@ -7,7 +7,7 @@
         optionStorageKey: 'Options',
         languageStorageKeyPrefix: 'Language',
         settingHistoryKeyPrefix: 'History',
-        languagePath: 'langs',
+        languagePath: 'aria-ng/langs',
         languageFileExtension: '.txt',
         defaultLanguage: 'en',
         defaultHost: 'localhost',
