@@ -90,10 +90,29 @@ gulp.task('process-html', ['prepare-html'], function () {
     return gulp.src([
         'resources/aria-ng/.tmp/*.html'
     ]).pipe($.replace(/<!-- AriaNg-Bundle:\w+ -->/, ''))
-        .pipe($.replace(/\{\{([a-zA-Z |'|(\)]*)\}\}/g, '{\\{$1}}'))
+        // .pipe($.replace(/\{\{([a-zA-Z |'|(\)]*)\}\}/g, '{\\{$1}}'))
+        .pipe($.replace(
+            /\{\{(([a-zA-Z ]+)|'([a-zA-z ]+)' \| translate|\('([a-zA-Z ]+)' \| translate\))\}\}/g, 
+            function (match, p1, p2, p3, p4) {
+                var matchStr = '';
+                var i = 0;
+                matchArray = [p2, p3, p4];
+                for (i = 0; i <matchArray.length; i++) {
+                    if (matchArray[i] === undefined) {
+                        continue;
+                    }
+                    matchArray[i] = matchArray[i].toString().replace(/ /g, '_');
+                    matchStr = matchArray[i].toLowerCase();
+                    break;
+                }
+                console.log('{{ __(\'aria.' + matchStr + '\') }}');
+                
+                return '{{ __(\'aria.' + matchStr + '\') }}';
+            }
+        ))
         .pipe($.rename('ng.blade.php'))
         .pipe($.replace(/(css|js)\/([A-Za-z0-9\-\.]+)\.(css|js)/g, 'aria-ng/$1/$2.$3'))
-        .pipe(gulp.dest('resources/views/'))
+        .pipe(gulp.dest('resources/views/'));
         // .pipe(gulp.dest('public/aria-ng'));
 });
 
