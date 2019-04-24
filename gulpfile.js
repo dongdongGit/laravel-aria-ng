@@ -71,7 +71,6 @@ gulp.task('prepare-views', function () {
         .pipe(gulp.dest('resources/aria-ng/.tmp/scripts'));
 });
 
-// TODO: src
 gulp.task('prepare-html', ['prepare-styles', 'prepare-scripts', 'prepare-views'], function () {
     return gulp.src([
         'resources/aria-ng/src/*.html'
@@ -90,7 +89,6 @@ gulp.task('process-html', ['prepare-html'], function () {
     return gulp.src([
         'resources/aria-ng/.tmp/*.html'
     ]).pipe($.replace(/<!-- AriaNg-Bundle:\w+ -->/, ''))
-        // .pipe($.replace(/\{\{([a-zA-Z |'|(\)]*)\}\}/g, '{\\{$1}}'))
         .pipe($.replace(
             /\{\{(([a-zA-Z ]+)|'([a-zA-z ]+)' \| translate|\('([a-zA-Z ]+)' \| translate\))\}\}/g, 
             function (match, p1, p2, p3, p4) {
@@ -105,7 +103,6 @@ gulp.task('process-html', ['prepare-html'], function () {
                     matchStr = matchArray[i].toLowerCase();
                     break;
                 }
-                console.log('{{ __(\'aria.' + matchStr + '\') }}');
                 
                 return '{{ __(\'aria.' + matchStr + '\') }}';
             }
@@ -113,7 +110,6 @@ gulp.task('process-html', ['prepare-html'], function () {
         .pipe($.rename('ng.blade.php'))
         .pipe($.replace(/(css|js)\/([A-Za-z0-9\-\.]+)\.(css|js)/g, 'aria-ng/$1/$2.$3'))
         .pipe(gulp.dest('resources/views/'));
-        // .pipe(gulp.dest('public/aria-ng'));
 });
 
 gulp.task('process-assets', ['process-html'], function () {
