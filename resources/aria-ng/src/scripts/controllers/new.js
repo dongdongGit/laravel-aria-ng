@@ -2,7 +2,7 @@
     'use strict';
 
     angular.module('ariaNg').controller('NewTaskController', ['$rootScope', '$scope', '$location', '$timeout', 'ariaNgCommonService', 'ariaNgLocalizationService', 'ariaNgLogService', 'ariaNgFileService', 'ariaNgSettingService', 'aria2TaskService', 'aria2SettingService', function ($rootScope, $scope, $location, $timeout, ariaNgCommonService, ariaNgLocalizationService, ariaNgLogService, ariaNgFileService, ariaNgSettingService, aria2TaskService, aria2SettingService) {
-        var tabOrders = ['links', 'options'];
+        var tabOrders = ['links', 'options', 'thunders'];
         var parameters = $location.search();
 
         var saveDownloadPath = function (options) {
@@ -14,6 +14,27 @@
         };
 
         var downloadByLinks = function (pauseOnAdded, responseCallback) {
+            var urls = ariaNgCommonService.parseUrlsFromOriginInput($scope.context.urls);
+            var options = angular.copy($scope.context.options);
+            var tasks = [];
+
+            for (var i = 0; i < urls.length; i++) {
+                if (urls[i] === '' || urls[i].trim() === '') {
+                    continue;
+                }
+
+                tasks.push({
+                    urls: [urls[i].trim()],
+                    options: options
+                });
+            }
+
+            saveDownloadPath(options);
+
+            return aria2TaskService.newUriTasks(tasks, pauseOnAdded, responseCallback);
+        };
+
+        var downloadByThunders = function (pauseOnAdded, responseCallback) {
             var urls = ariaNgCommonService.parseUrlsFromOriginInput($scope.context.urls);
             var options = angular.copy($scope.context.options);
             var tasks = [];
@@ -210,6 +231,11 @@
             return urls ? urls.length : 0;
         };
 
-        $rootScope.loadPromise = $timeout(function () {}, 100);
+        $scope.getValidThundersCount = function () {
+            var thunders = ariaNgCommonService.parseUrlsFromOriginInput($scope.context.urls);
+            return urls ? urls.length : 0;
+        };
+
+        $rootScope.loadPromise = $timeout(function () { }, 100);
     }]);
 }());

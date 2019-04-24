@@ -84,6 +84,7 @@ Remain Time=剩余时间
 Download Speed=下载速度
 Upload Speed=上传速度
 Links=链接
+Thunders=迅雷链接
 Torrent File=种子文件
 Metalink File=Metalink 文件
 File Name:=文件名:
