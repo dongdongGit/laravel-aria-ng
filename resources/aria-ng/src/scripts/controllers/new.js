@@ -2,8 +2,14 @@
     'use strict';
 
     angular.module('ariaNg').controller('NewTaskController', ['$rootScope', '$scope', '$location', '$timeout', 'ariaNgCommonService', 'ariaNgLocalizationService', 'ariaNgLogService', 'ariaNgFileService', 'ariaNgSettingService', 'aria2TaskService', 'aria2SettingService', function ($rootScope, $scope, $location, $timeout, ariaNgCommonService, ariaNgLocalizationService, ariaNgLogService, ariaNgFileService, ariaNgSettingService, aria2TaskService, aria2SettingService) {
-        var tabOrders = ['links', 'options', 'thunders'];
+        var tabOrders = ['links', 'options'];
         var parameters = $location.search();
+
+        var base64Decode = function (str) {
+            return decodeURIComponent(atob(str).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        }
 
         var saveDownloadPath = function (options) {
             if (!options || !options.dir) {
@@ -21,6 +27,15 @@
             for (var i = 0; i < urls.length; i++) {
                 if (urls[i] === '' || urls[i].trim() === '') {
                     continue;
+                }
+
+                var matches = urls[i].match(/^thunder:\/\/([a-zA-Z\d/=]+)/i);
+                if (matches) {
+                    var beas64DecodeUrl = base64Decode(matches[1]);
+                    if (beas64DecodeUrl.substr(0, 2) === 'AA' && beas64DecodeUrl.slice(-2) === 'ZZ') {
+                        urls[i] = beas64DecodeUrl.slice(2, -2);
+
+                    }
                 }
 
                 tasks.push({

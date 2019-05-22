@@ -5,15 +5,6 @@
                 <li ng-class="{'active': context.currentTab === 'links'}">
                     <a class="pointer-cursor" ng-click="changeTab('links')" ng-bind="(context.taskType === 'torrent' ? 'Torrent File' : (context.taskType === 'metalink' ? 'Metalink File' : 'Links') | translate)">Links</a>
                 </li>
-                <li ng-class="{'active': context.currentTab === 'thunders'}">
-                    <a class="pointer-cursor" ng-click="changeTab('thunder')" ng-bind="(
-                        context.taskType === 'torrent'
-                            ? 'Torrent File'
-                            : (context.taskType === 'metalink'
-                                ? 'Metalink File'
-                                : content.taskType === 'links' ? 'Links' : 'Thunders')
-                         | translate)">Thunders</a>
-                </li>
                 <li ng-class="{'active': context.currentTab === 'options'}">
                     <a class="pointer-cursor" ng-click="changeTab('options')" translate>Options</a>
                 </li>
@@ -71,23 +62,6 @@
                         </div>
                     </div>
                     <input id="file-holder" type="file" style="display: none"/>
-                </div>
-                <div class="tab-pane" ng-class="{'active': context.currentTab === 'thunders'}">
-                    <div class="new-task-table" ng-if="context.taskType === 'thunders'">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <p ng-bind="'format.task.new.download-links' | translate: {count: getValidUrlsCount()}">Download Links:</p>
-                                <div class="form-group has-feedback no-margin" ng-class="{ 'has-error' : newTaskForm.urls.$invalid && newTaskForm.urls.$dirty, 'has-success' : newTaskForm.urls.$valid && newTaskForm.urls.$dirty }">
-                                    <textarea name="urls" class="form-control" rows="10" autofocus="autofocus" ng-auto-focus ng-valid-urls
-                                              ng-model="context.urls" ng-required="true" ng-keydown="urlTextboxKeyDown($event)"
-                                              ng-placeholder="'Support multiple URLs, one URL per line.' | translate"></textarea>
-                                    <div class="form-control-icon" ng-if="newTaskForm.urls.$dirty">
-                                        <i class="fa form-control-feedback" ng-class="{'fa-check':newTaskForm.urls.$valid, 'fa-times':newTaskForm.urls.$invalid}"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 <div class="tab-pane" ng-class="{'active': context.currentTab === 'options'}">
                     <div class="settings-table striped hoverable">
