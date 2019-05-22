@@ -5,6 +5,12 @@
         var tabOrders = ['links', 'options'];
         var parameters = $location.search();
 
+        var base64Decode = function (str) {
+            return decodeURIComponent(atob(str).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        }
+
         var saveDownloadPath = function (options) {
             if (!options || !options.dir) {
                 return;
@@ -14,6 +20,36 @@
         };
 
         var downloadByLinks = function (pauseOnAdded, responseCallback) {
+            var urls = ariaNgCommonService.parseUrlsFromOriginInput($scope.context.urls);
+            var options = angular.copy($scope.context.options);
+            var tasks = [];
+
+            for (var i = 0; i < urls.length; i++) {
+                if (urls[i] === '' || urls[i].trim() === '') {
+                    continue;
+                }
+
+                var matches = urls[i].match(/^thunder:\/\/([a-zA-Z\d/=]+)/i);
+                if (matches) {
+                    var beas64DecodeUrl = base64Decode(matches[1]);
+                    if (beas64DecodeUrl.substr(0, 2) === 'AA' && beas64DecodeUrl.slice(-2) === 'ZZ') {
+                        urls[i] = beas64DecodeUrl.slice(2, -2);
+
+                    }
+                }
+
+                tasks.push({
+                    urls: [urls[i].trim()],
+                    options: options
+                });
+            }
+
+            saveDownloadPath(options);
+
+            return aria2TaskService.newUriTasks(tasks, pauseOnAdded, responseCallback);
+        };
+
+        var downloadByThunders = function (pauseOnAdded, responseCallback) {
             var urls = ariaNgCommonService.parseUrlsFromOriginInput($scope.context.urls);
             var options = angular.copy($scope.context.options);
             var tasks = [];
@@ -210,6 +246,11 @@
             return urls ? urls.length : 0;
         };
 
-        $rootScope.loadPromise = $timeout(function () {}, 100);
+        $scope.getValidThundersCount = function () {
+            var thunders = ariaNgCommonService.parseUrlsFromOriginInput($scope.context.urls);
+            return urls ? urls.length : 0;
+        };
+
+        $rootScope.loadPromise = $timeout(function () { }, 100);
     }]);
 }());

@@ -79,7 +79,7 @@
                 for (var i = 0; i < lines.length; i++) {
                     var line = lines[i];
 
-                    if (line.match(/^(http|https|ftp|sftp):\/\/.+$/)) {
+                    if (line.match(/^(http|https|ftp|sftp|thunder):\/\/.+$/)) {
                         result.push(line);
                     } else if (line.match(/^magnet:\?.+$/)) {
                         result.push(line);
