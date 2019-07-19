@@ -63,29 +63,42 @@
         $scope.quickSettingContext = null;
 
         $scope.rpcSettings = ariaNgSettingService.getAllRpcSettings();
+        $scope.isCurrentRpcUseWebSocket = ariaNgSettingService.isCurrentRpcUseWebSocket();
 
         $scope.isTaskSelected = function () {
             return $rootScope.taskContext.getSelectedTaskIds().length > 0;
         };
 
-        $scope.isSingleUrlTaskSelected = function () {
+        $scope.isSelectedTasksAllHaveUrl = function () {
             var selectedTasks = $rootScope.taskContext.getSelectedTasks();
 
-            if (selectedTasks.length !== 1) {
+            if (selectedTasks.length < 1) {
                 return false;
             }
 
-            return !!selectedTasks[0].singleUrl;
+            for (var i = 0; i < selectedTasks.length; i++) {
+                if (!selectedTasks[i].singleUrl) {
+                    return false;
+                }
+            }
+
+            return true;
         };
 
-        $scope.isSingleBittorrentHasInfoHashTaskSelected = function () {
+        $scope.isSelectedTasksAllHaveInfoHash = function () {
             var selectedTasks = $rootScope.taskContext.getSelectedTasks();
 
-            if (selectedTasks.length !== 1) {
+            if (selectedTasks.length < 1) {
                 return false;
             }
 
-            return !!selectedTasks[0].bittorrent && !!selectedTasks[0].infoHash;
+            for (var i = 0; i < selectedTasks.length; i++) {
+                if (!selectedTasks[i].bittorrent || !selectedTasks[i].infoHash) {
+                    return false;
+                }
+            }
+
+            return true;
         };
 
         $scope.isSpecifiedTaskSelected = function () {
@@ -199,6 +212,10 @@
 
         $scope.hasRetryableTask = function () {
             return $rootScope.taskContext.hasRetryableTask();
+        };
+
+        $scope.hasCompletedTask = function () {
+            return $rootScope.taskContext.hasCompletedTask();
         };
 
         $scope.isSelectedTaskRetryable = function () {
@@ -326,19 +343,41 @@
             $rootScope.taskContext.selectAllFailed();
         };
 
-        $scope.copySelectedOneTaskDownloadLink = function () {
-            var selectedTasks = $rootScope.taskContext.getSelectedTasks();
+        $scope.selectAllCompletedTasks = function () {
+            $rootScope.taskContext.selectAllCompleted();
+        };
 
-            if (selectedTasks.length === 1) {
-                clipboard.copyText(selectedTasks[0].singleUrl);
+        $scope.copySelectedTasksDownloadLink = function () {
+            var selectedTasks = $rootScope.taskContext.getSelectedTasks();
+            var result = '';
+
+            for (var i = 0; i < selectedTasks.length; i++) {
+                if (i > 0) {
+                    result += '\n';
+                }
+
+                result += selectedTasks[i].singleUrl;
+            }
+
+            if (result.length > 0) {
+                clipboard.copyText(result);
             }
         };
 
-        $scope.copySelectedOneTaskMagnetLink = function () {
+        $scope.copySelectedTasksMagnetLink = function () {
             var selectedTasks = $rootScope.taskContext.getSelectedTasks();
+            var result = '';
 
-            if (selectedTasks.length === 1) {
-                clipboard.copyText('magnet:?xt=urn:btih:' + selectedTasks[0].infoHash);
+            for (var i = 0; i < selectedTasks.length; i++) {
+                if (i > 0) {
+                    result += '\n';
+                }
+
+                result += 'magnet:?xt=urn:btih:' + selectedTasks[i].infoHash;
+            }
+
+            if (result.length > 0) {
+                clipboard.copyText(result);
             }
         };
 
