@@ -1,6 +1,6 @@
 var gulp = require('gulp');
 var gulpLoadPlugins = require('gulp-load-plugins');
-var browserSync = require('browser-sync');
+var browserSync = require('browser-sync').create();
 var del = require('del');
 var fs = require('fs');
 var git = require('git-rev-sync');
@@ -218,15 +218,26 @@ gulp.task('build-bundle', $.sequence('lint', 'process-assets-bundle', 'info'));
 // gulp.task('build-bundle', $.sequence('lint', 'process-assets-bundle', 'process-tiny-extras', 'info'));
 
 gulp.task('serve', ['prepare-styles', 'prepare-scripts', 'prepare-fonts'], function () {
-    browserSync({
-        notify: false,
-        port: 9000,
-        server: {
-            baseDir: ['resource/aria-ng/.tmp', 'resource/aria-ng/src'],
-            routes: {
-                '/node_modules': 'node_modules'
-            }
-        }
+    browserSync.init({
+        notify: true,
+        port: 3030,
+        online: true,
+        proxy: "http://ariang.test",
+        files: [
+            'resources/aria-ng/src/*.html',
+            'resources/aria-ng/src/*.ico',
+            'resources/aria-ng/src/*.png',
+            'resources/aria-ng/src/langs/*.txt',
+            'resources/aria-ng/src/views/*.html',
+            'resources/aria-ng/src/imgs/**/*',
+            'resources/aria-ng/.tmp/fonts/**/*'
+        ],
+        // server: {
+        //     baseDir: ['resource/aria-ng/.tmp', 'resource/aria-ng/src'],
+        //     routes: {
+        //         '/node_modules': 'node_modules'
+        //     }
+        // }
     });
 
     gulp.watch([
