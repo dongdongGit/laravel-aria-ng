@@ -294,6 +294,12 @@
             task.remainTime = calculateDownloadRemainTime(task.remainLength, task.downloadSpeed);
             task.seeder = (task.seeder === true || task.seeder === 'true');
 
+            if (task.verifiedLength && task.totalLength) {
+                task.verifiedPercent = parseInt(task.verifiedLength / task.totalLength * 100);
+            } else {
+                task.verifiedPercent = undefined;
+            }
+
             var taskNameResult = getTaskName(task);
             task.taskName = taskNameResult.name;
             task.hasTaskName = taskNameResult.success;
@@ -843,6 +849,28 @@
                     silent: !!silent,
                     callback: callback
                 });
+            },
+            onConnectionSuccess: function (callback) {
+                if (!callback) {
+                    ariaNgLogService.warn('[aria2TaskService.onConnectionSuccess] callback is null');
+                    return;
+                }
+
+                aria2RpcService.onConnectionSuccess({
+                    callback: callback
+                });
+
+            },
+            onConnectionFailed: function (callback) {
+                if (!callback) {
+                    ariaNgLogService.warn('[aria2TaskService.onConnectionFailed] callback is null');
+                    return;
+                }
+
+                aria2RpcService.onConnectionFailed({
+                    callback: callback
+                });
+
             },
             onFirstSuccess: function (callback) {
                 if (!callback) {

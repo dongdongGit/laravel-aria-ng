@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    angular.module('ariaNg').factory('aria2WebSocketRpcService', ['$q', '$websocket', 'ariaNgSettingService', 'ariaNgLogService', function ($q, $websocket, ariaNgSettingService, ariaNgLogService) {
+    angular.module('ariaNg').factory('aria2WebSocketRpcService', ['$q', '$websocket', 'ariaNgConstants', 'ariaNgSettingService', 'ariaNgLogService', function ($q, $websocket, ariaNgConstants, ariaNgSettingService, ariaNgLogService) {
         var rpcUrl = ariaNgSettingService.getCurrentRpcUrl();
         var socketClient = null;
 
@@ -27,6 +27,12 @@
                 success: true,
                 context: context
             });
+
+            if (content.result && context.connectionSuccessCallback) {
+                context.connectionSuccessCallback({
+                    rpcUrl: rpcUrl
+                });
+            }
 
             if (content.result && context.successCallback) {
                 ariaNgLogService.debug('[aria2WebSocketRpcService.request] ' + (context && context.requestBody && context.requestBody.method ? context.requestBody.method + ' ' : '') + 'response success', content);
@@ -63,10 +69,12 @@
             }
         };
 
-        var getSocketClient = function () {
+        var getSocketClient = function (context) {
             if (socketClient === null) {
                 try {
-                    socketClient = $websocket(rpcUrl);
+                    socketClient = $websocket(rpcUrl, {
+                        reconnectIfNotNormalClose: ariaNgConstants.websocketAutoReconnect
+                    });
 
                     socketClient.onMessage(function (message) {
                         if (!message || !message.data) {
@@ -83,6 +91,26 @@
                             processMethodCallback(content);
                         } else if (content.method) {
                             processEventCallback(content);
+                        }
+                    });
+
+                    socketClient.onOpen(function (e) {
+                        ariaNgLogService.debug('[aria2WebSocketRpcService.onOpen] websocket is opened', e);
+
+                        if (context && context.connectionSuccessCallback) {
+                            context.connectionSuccessCallback({
+                                rpcUrl: rpcUrl
+                            });
+                        }
+                    });
+
+                    socketClient.onClose(function (e) {
+                        ariaNgLogService.warn('[aria2WebSocketRpcService.onClose] websocket is closed', e);
+
+                        if (context && context.connectionFailedCallback) {
+                            context.connectionFailedCallback({
+                                rpcUrl: rpcUrl
+                            });
                         }
                     });
                 } catch (ex) {
@@ -106,7 +134,9 @@
                     return;
                 }
 
-                var client = getSocketClient();
+                var client = getSocketClient({
+                    connectionFailedCallback: context.connectionFailedCallback
+                });
                 var uniqueId = context.uniqueId;
                 var requestBody = angular.toJson(context.requestBody);
 
