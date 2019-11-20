@@ -12,7 +12,7 @@
     },
     "dependencies": {
         "admin-lte": "2.4.10",
-        "angular": "1.6.10",
+        "angular": "1.7.9",
         "angular-animate": "1.6.10",
         "angular-bittorrent-peerid": "^1.2.0",
         "angular-busy": "^4.1.4",
